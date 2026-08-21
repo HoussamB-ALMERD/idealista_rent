@@ -1,69 +1,175 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+import { useState, type FormEvent } from "react";
+
+const PRICE_OPTIONS = ["500", "600", "700", "800", "900", "1000", "1100", "1200", "1300", "1400", "1500", "1600", "1800", "2000", "2500", "3000"];
+
+type SubmitState =
+  | { status: "idle" }
+  | { status: "submitting" }
+  | { status: "success" }
+  | { status: "error"; message: string };
+
+export default function SignupPage() {
+  const [displayName, setDisplayName] = useState("");
+  const [location, setLocation] = useState("Salerno");
+  const [maxPrice, setMaxPrice] = useState("1500");
+  const [telegramBotToken, setTelegramBotToken] = useState("");
+  const [passcode, setPasscode] = useState("");
+  const [state, setState] = useState<SubmitState>({ status: "idle" });
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setState({ status: "submitting" });
+
+    try {
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ displayName, location, maxPrice, telegramBotToken, passcode }),
+      });
+      const json = await res.json();
+
+      if (res.ok) {
+        setState({ status: "success" });
+      } else {
+        setState({ status: "error", message: json.message ?? "Something went wrong." });
+      }
+    } catch {
+      setState({ status: "error", message: "Network error — check your connection and try again." });
+    }
+  }
+
+  if (state.status === "success") {
+    return (
+      <main className="flex-1 flex items-center justify-center p-6">
+        <div className="max-w-md text-center space-y-3">
+          <div className="text-4xl">✅</div>
+          <h1 className="text-xl font-semibold">You&apos;re all set!</h1>
+          <p className="text-neutral-600 dark:text-neutral-400">
+            Check Telegram for a confirmation message. New rental listings will start arriving
+            there, with buttons to save or dismiss each one.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
       </main>
-    </div>
+    );
+  }
+
+  return (
+    <main className="flex-1 flex items-center justify-center p-6">
+      <div className="w-full max-w-md space-y-6">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold">Idealista Rental Alerts</h1>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+            Get new Italian rental listings DMed to your own Telegram bot, checked every 6 hours.
+          </p>
+        </div>
+
+        <ol className="text-sm space-y-1 text-neutral-600 dark:text-neutral-400 list-decimal list-inside">
+          <li>
+            Create a bot with{" "}
+            <a
+              className="underline"
+              href="https://t.me/BotFather"
+              target="_blank"
+              rel="noreferrer"
+            >
+              @BotFather
+            </a>{" "}
+            on Telegram and copy its token.
+          </li>
+          <li>Open a chat with your new bot and send it any message, e.g. /start.</li>
+          <li>Fill in the form below and click Start.</li>
+        </ol>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1" htmlFor="displayName">
+              Your name (optional)
+            </label>
+            <input
+              id="displayName"
+              className="w-full rounded border border-neutral-300 dark:border-neutral-700 bg-transparent px-3 py-2"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="e.g. Maria"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1" htmlFor="location">
+              City
+            </label>
+            <input
+              id="location"
+              required
+              className="w-full rounded border border-neutral-300 dark:border-neutral-700 bg-transparent px-3 py-2"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g. Salerno"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1" htmlFor="maxPrice">
+              Max price (€/month)
+            </label>
+            <select
+              id="maxPrice"
+              className="w-full rounded border border-neutral-300 dark:border-neutral-700 bg-transparent px-3 py-2"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+            >
+              {PRICE_OPTIONS.map((p) => (
+                <option key={p} value={p}>
+                  €{p}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1" htmlFor="telegramBotToken">
+              Telegram bot token
+            </label>
+            <input
+              id="telegramBotToken"
+              required
+              className="w-full rounded border border-neutral-300 dark:border-neutral-700 bg-transparent px-3 py-2 font-mono text-sm"
+              value={telegramBotToken}
+              onChange={(e) => setTelegramBotToken(e.target.value)}
+              placeholder="123456789:AAF5..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1" htmlFor="passcode">
+              Passcode
+            </label>
+            <input
+              id="passcode"
+              required
+              type="password"
+              className="w-full rounded border border-neutral-300 dark:border-neutral-700 bg-transparent px-3 py-2"
+              value={passcode}
+              onChange={(e) => setPasscode(e.target.value)}
+              placeholder="Ask the owner if you don't have this"
+            />
+          </div>
+
+          {state.status === "error" && (
+            <p className="text-sm text-red-600 dark:text-red-400">{state.message}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={state.status === "submitting"}
+            className="w-full rounded bg-black text-white dark:bg-white dark:text-black py-2 font-medium disabled:opacity-50"
+          >
+            {state.status === "submitting" ? "Starting…" : "Start"}
+          </button>
+        </form>
+      </div>
+    </main>
   );
 }
