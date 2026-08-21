@@ -1,26 +1,118 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --term-bg: #050805;
+  --term-bg-panel: #0a100a;
+  --term-green: #33ff66;
+  --term-green-bright: #7fff9f;
+  --term-green-dim: #1e7a3a;
+  --term-red: #ff3b3b;
+  --term-amber: #ffb000;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--term-bg);
+  --color-foreground: var(--term-green);
+  --font-sans: var(--font-terminal-mono);
+  --font-mono: var(--font-terminal-mono);
+  --font-display: var(--font-terminal-display);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  scrollbar-color: var(--term-green-dim) var(--term-bg);
+}
+
+html,
+body {
+  background: var(--term-bg);
+  color: var(--term-green);
+  font-family: var(--font-terminal-mono), "Courier New", monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* CRT scanline overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(51, 255, 102, 0.05) 0px,
+    rgba(51, 255, 102, 0.05) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* Faint vignette to sell the "console monitor" feel */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+  pointer-events: none;
+  box-shadow: inset 0 0 12vw rgba(0, 0, 0, 0.85);
+}
+
+::selection {
+  background: var(--term-green);
+  color: var(--term-bg);
+}
+
+input:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--term-green);
+  -webkit-box-shadow: 0 0 0px 1000px var(--term-bg-panel) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+@keyframes term-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.term-cursor::after {
+  content: "\2588";
+  margin-left: 2px;
+  animation: term-blink 1s step-end infinite;
+}
+
+@keyframes term-flicker {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.4;
+  }
+  10% {
+    opacity: 0.1;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.term-boot {
+  animation: term-flicker 0.6s ease-in both;
+}
+
+.term-glow {
+  text-shadow:
+    0 0 4px currentColor,
+    0 0 12px rgba(51, 255, 102, 0.5);
 }

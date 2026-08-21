@@ -1,27 +1,29 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Share_Tech_Mono, VT323 } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const terminalMono = Share_Tech_Mono({
+  variable: "--font-terminal-mono",
+  weight: "400",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const terminalDisplay = VT323({
+  variable: "--font-terminal-display",
+  weight: "400",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Idealista Rental Alerts",
-  description: "Get new Italian rental listings DMed to your Telegram bot.",
+  title: "IDEALISTA-ALERT // TERMINAL",
+  description: "Restricted access terminal: Italian rental surveillance network.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${terminalMono.variable} ${terminalDisplay.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
